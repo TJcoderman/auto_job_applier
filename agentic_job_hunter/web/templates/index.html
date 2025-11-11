@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Job Hunter · Control Tower</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="background-glow"></div>
+    <header class="hero">
+        <div class="hero__content">
+            <h1>Agentic Job Hunter</h1>
+            <p class="tagline">Vibe-checked automation for high-salary job quests. Less doomscrolling, more offer letters.</p>
+            <div class="hero__actions">
+                <button id="run-btn" class="primary">Launch Agent</button>
+                <a href="#how-it-works" class="secondary">How it works</a>
+            </div>
+        </div>
+        <div class="hero__callout">
+            <p class="callout-title">Marketing Flex</p>
+            <p class="callout-body">“Like having a career coach, hype squad, and comfy hoodie in one app.”</p>
+        </div>
+    </header>
+
+    <main>
+        <section class="card-grid">
+            <article class="card">
+                <h2>API Keys &amp; Trust Vibes</h2>
+                <p>Drop an OpenAI key below if you want AI-powered résumé glow ups. We never store it server-side; it stays in your session.</p>
+                <label class="input-label" for="openai-key">OpenAI API Key</label>
+                <input id="openai-key" type="password" placeholder="sk-..." autocomplete="off">
+                <p class="helper">No key? You can still preview the flow or swap in <a href="https://platform.openai.com/signup" target="_blank">OpenAI</a> / <a href="https://console.anthropic.com/" target="_blank">Claude</a> later.</p>
+            </article>
+            <article class="card">
+                <h2>Run Settings</h2>
+                <label class="input-label" for="max-jobs">Max jobs this run</label>
+                <input id="max-jobs" type="number" min="1" max="25" placeholder="5">
+                <p class="helper">We’ll pull postings, tailor your résumé, and prep the application queue.</p>
+            </article>
+            <article class="card status-card">
+                <h2>Status Feed</h2>
+                <div id="status" class="status">
+                    <p>Agent chilling. Press “Launch Agent” to start the hustle.</p>
+                </div>
+            </article>
+        </section>
+
+        <section id="how-it-works" class="how-it-works">
+            <h2>How this thing earns its hoodie</h2>
+            <div class="steps">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Profile Glow-Up</h3>
+                    <p>Securely load your base résumé and vibe-friendly portfolio links. No catfishing recruiters.</p>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>High-Roller Scouting</h3>
+                    <p>Scrapes top boards for high comp roles using your preferred keywords. Salary tea included.</p>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>LLM Tailor</h3>
+                    <p>Feeds the JD to an LLM for résumé tweaks. No hallucinations, just data-backed flexing.</p>
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h3>Autofill Wizardry</h3>
+                    <p>Plays nice with ATS forms (Workday, Lever, Greenhouse). You stay sipping matcha.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="faq">
+            <h2>FAQ (Frequently Asked Quirks)</h2>
+            <div class="faq-grid">
+                <article>
+                    <h3>Do I have to share API keys?</h3>
+                    <p>Only if you want resume tailoring magic. Otherwise, the app runs in discovery mode. You can also use managed keys via services like <a href="https://openrouter.ai/" target="_blank">OpenRouter</a>.</p>
+                </article>
+                <article>
+                    <h3>Is this ready for launch?</h3>
+                    <p>Early beta energy. Test thoroughly before letting it apply with your actual résumé. You’re not too forward—just keep humans in the loop.</p>
+                </article>
+                <article>
+                    <h3>How do I deploy?</h3>
+                    <p>Ship it to cloud platforms (Railway, Render, Fly.io). `uvicorn agentic_job_hunter.web.server:app --host 0.0.0.0 --port 8000` and you’re live.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Designed for the hustlers, side-questers, and vibe coders. Built with ❤️ in Python.</p>
+    </footer>
+
+    <script>
+        const runBtn = document.getElementById("run-btn");
+        const statusEl = document.getElementById("status");
+        const maxJobsInput = document.getElementById("max-jobs");
+        const openAiInput = document.getElementById("openai-key");
+
+        async function refreshStatus() {
+            const response = await fetch("/api/status");
+            if (!response.ok) {
+                statusEl.innerHTML = "<p class='error'>Status fetch failed. Maybe the agent is ghosting?</p>";
+                return;
+            }
+            const data = await response.json();
+            const { running, latest } = data;
+
+            let html = "";
+            if (running) {
+                html += "<p class='running'>Agent is doing cardio in the job market...</p>";
+            } else {
+                html += "<p>Agent is idle. Time to queue another run?</p>";
+            }
+
+            if (latest) {
+                html += `<div class="latest">
+                    <h3>Last Run</h3>
+                    <p>Status: <strong>${latest.status}</strong></p>
+                    <p>Total applications: <strong>${latest.total_applications}</strong></p>
+                    ${latest.notes ? `<p>Notes: ${latest.notes}</p>` : ""}
+                `;
+                if (latest.results && latest.results.length) {
+                    html += "<ul class='result-list'>";
+                    latest.results.forEach(result => {
+                        html += `
+                            <li>
+                                <span class="title">${result.job_title}</span>
+                                <span class="company">@ ${result.company}</span>
+                                <span class="status-pill">${result.status}</span>
+                                <span class="timestamp">${result.submitted_at}</span>
+                            </li>
+                        `;
+                    });
+                    html += "</ul>";
+                }
+                html += "</div>";
+            }
+            statusEl.innerHTML = html;
+        }
+
+        async function launchRun() {
+            runBtn.disabled = true;
+            runBtn.textContent = "Launching...";
+            const payload = {
+                maxJobs: maxJobsInput.value ? Number(maxJobsInput.value) : null,
+                openaiKey: openAiInput.value || null,
+            };
+            const response = await fetch("/api/run", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                const message = await response.json();
+                statusEl.innerHTML = `<p class='error'>${message.detail || "Agent refused to vibe."}</p>`;
+            } else {
+                const message = await response.json();
+                statusEl.innerHTML = `<p class='running'>${message.message}</p>`;
+            }
+            runBtn.disabled = false;
+            runBtn.textContent = "Launch Agent";
+            setTimeout(refreshStatus, 1000);
+        }
+
+        runBtn.addEventListener("click", launchRun);
+        setInterval(refreshStatus, 5000);
+        refreshStatus();
+    </script>
+</body>
+</html>
+

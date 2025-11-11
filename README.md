@@ -58,6 +58,20 @@ Additional top-level assets:
 - `python -m agentic_job_hunter jobs scout` – sample the current job market using configured scrapers.
 - Add `--log-level DEBUG` to any command for verbose tracing.
 
+## Web Experience (Beta)
+
+Launch the FastAPI control tower with a dark, Gen-Z flavored UI:
+
+```bash
+uvicorn agentic_job_hunter.web.server:app --reload
+```
+
+The dashboard provides:
+
+- Run controls with max-job limits and optional OpenAI API key entry.
+- Live status feed for recent application runs.
+- Marketing-ready copy and feature walkthrough for demo purposes.
+
 ## Guiding Principles
 
 - **Security first:** treat PII and credentials carefully; plan for future secure storage.
