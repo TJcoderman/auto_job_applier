@@ -15,6 +15,7 @@
             <div class="hero__actions">
                 <button id="run-btn" class="primary">Launch Agent</button>
                 <a href="#how-it-works" class="secondary">How it works</a>
+                <a href="/onboarding" class="secondary">Onboarding guide</a>
             </div>
         </div>
         <div class="hero__callout">
@@ -43,6 +44,65 @@
                 <div id="status" class="status">
                     <p>Agent chilling. Press “Launch Agent” to start the hustle.</p>
                 </div>
+            </article>
+            <article class="card">
+                <h2>Latest Runs</h2>
+                <ul class="run-list" id="recent-runs">
+                    {% for run in recent_runs %}
+                    <li>
+                        <div>
+                            <strong>{{ run.run_id }}</strong>
+                            <span class="subtext">{{ run.started_at }} → {{ run.ended_at }}</span>
+                        </div>
+                        <div class="subtext">Jobs: {{ run.result_count }} | {{ run.status_counts }}</div>
+                    </li>
+                    {% else %}
+                    <li>No runs yet. Launch the agent!</li>
+                    {% endfor %}
+                </ul>
+            </article>
+            <article class="card">
+                <h2>Top Matches</h2>
+                <ul class="top-matches-list" id="top-matches">
+                    {% set picks = top_matches or [] %}
+                    {% for item in picks %}
+                    <li>
+                        <div>
+                            <strong>{{ item.job_title }}</strong>
+                            <span class="subtext">@ {{ item.company }} · {{ (item.fit_score or 0) * 100 | round(1) }}%</span>
+                        </div>
+                        <div class="subtext">{{ item.status }} · {{ item.source }}</div>
+                    </li>
+                    {% else %}
+                    <li>No matches yet. Launch the agent for fresh intel.</li>
+                    {% endfor %}
+                </ul>
+            </article>
+            <article class="card">
+                <h2>Recruiter Feedback</h2>
+                <ul class="feedback-list" id="feedback-list">
+                    {% for item in feedback_entries %}
+                    <li>
+                        <p><strong>{{ item.job_title }}</strong> @ {{ item.company }}</p>
+                        <p class="subtext">{{ item.feedback }}</p>
+                        <p class="subtext">{{ item.received_at }}</p>
+                    </li>
+                    {% else %}
+                    <li>No feedback yet. Log one below.</li>
+                    {% endfor %}
+                </ul>
+                <button id="feedback-toggle" class="primary secondary-btn">Log feedback</button>
+                <form id="feedback-form" class="feedback-form hidden">
+                    <label class="input-label" for="feedback-run-id">Run ID</label>
+                    <input id="feedback-run-id" type="text" placeholder="Paste run id">
+                    <label class="input-label" for="feedback-job-title">Job Title</label>
+                    <input id="feedback-job-title" type="text" placeholder="Senior Developer">
+                    <label class="input-label" for="feedback-company">Company</label>
+                    <input id="feedback-company" type="text" placeholder="Acme Inc.">
+                    <label class="input-label" for="feedback-text">Feedback</label>
+                    <textarea id="feedback-text" rows="3" placeholder="Recruiter emailed to schedule a call..."></textarea>
+                    <button type="button" id="feedback-submit" class="primary">Save Feedback</button>
+                </form>
             </article>
         </section>
 
@@ -89,6 +149,42 @@
                 </article>
             </div>
         </section>
+
+        <section class="pricing">
+            <h2>Pricing &amp; Growth Paths</h2>
+            <div class="pricing-grid">
+                <article class="pricing-card">
+                    <h3>Indie Hustler</h3>
+                    <p class="price">$0</p>
+                    <ul>
+                        <li>Manual review on every submission</li>
+                        <li>Daily run limit: 5 jobs</li>
+                        <li>Email summaries only</li>
+                    </ul>
+                    <button class="primary secondary-btn" disabled>Current tier</button>
+                </article>
+                <article class="pricing-card">
+                    <h3>Pro Operator</h3>
+                    <p class="price">$99/mo</p>
+                    <ul>
+                        <li>Unlimited scouting + AI tailoring</li>
+                        <li>Slack / SMS notifications</li>
+                        <li>ATS-specific automation templates</li>
+                    </ul>
+                    <button class="primary">Join waitlist</button>
+                </article>
+                <article class="pricing-card">
+                    <h3>Enterprise Pods</h3>
+                    <p class="price">Custom</p>
+                    <ul>
+                        <li>Multi-seat admin + audit logs</li>
+                        <li>Talent ops analytics dashboard</li>
+                        <li>Dedicated success + compliance review</li>
+                    </ul>
+                    <a class="primary secondary" href="mailto:founders@agenticjobhunter.ai">Book strategy call</a>
+                </article>
+            </div>
+        </section>
     </main>
 
     <footer>
@@ -100,15 +196,29 @@
         const statusEl = document.getElementById("status");
         const maxJobsInput = document.getElementById("max-jobs");
         const openAiInput = document.getElementById("openai-key");
+        const feedbackToggle = document.getElementById("feedback-toggle");
+        const feedbackForm = document.getElementById("feedback-form");
+        const feedbackSubmit = document.getElementById("feedback-submit");
+        const feedbackRunId = document.getElementById("feedback-run-id");
+        const feedbackJobTitle = document.getElementById("feedback-job-title");
+        const feedbackCompany = document.getElementById("feedback-company");
+        const feedbackText = document.getElementById("feedback-text");
+        const recentRunsList = document.getElementById("recent-runs");
+        const feedbackList = document.getElementById("feedback-list");
+        const topMatchesList = document.getElementById("top-matches");
 
         async function refreshStatus() {
             const response = await fetch("/api/status");
+            if (response.status === 401) {
+                window.location.href = "/login";
+                return;
+            }
             if (!response.ok) {
                 statusEl.innerHTML = "<p class='error'>Status fetch failed. Maybe the agent is ghosting?</p>";
                 return;
             }
             const data = await response.json();
-            const { running, latest } = data;
+            const { running, latest, recent_runs = [], feedback = [], top_matches = [] } = data;
 
             let html = "";
             if (running) {
@@ -124,7 +234,7 @@
                     <p>Total applications: <strong>${latest.total_applications}</strong></p>
                     ${latest.notes ? `<p>Notes: ${latest.notes}</p>` : ""}
                 `;
-                if (latest.results && latest.results.length) {
+                    if (latest.results && latest.results.length) {
                     html += "<ul class='result-list'>";
                     latest.results.forEach(result => {
                         html += `
@@ -133,6 +243,7 @@
                                 <span class="company">@ ${result.company}</span>
                                 <span class="status-pill">${result.status}</span>
                                 <span class="timestamp">${result.submitted_at}</span>
+                                ${result.notes ? `<span class="notes">${result.notes}</span>` : ""}
                             </li>
                         `;
                     });
@@ -141,6 +252,10 @@
                 html += "</div>";
             }
             statusEl.innerHTML = html;
+
+            renderRecentRuns(recent_runs);
+            renderFeedback(feedback);
+            renderTopMatches(top_matches);
         }
 
         async function launchRun() {
@@ -156,6 +271,10 @@
                 body: JSON.stringify(payload),
             });
 
+            if (response.status === 401) {
+                window.location.href = "/login";
+                return;
+            }
             if (!response.ok) {
                 const message = await response.json();
                 statusEl.innerHTML = `<p class='error'>${message.detail || "Agent refused to vibe."}</p>`;
@@ -168,6 +287,100 @@
             setTimeout(refreshStatus, 1000);
         }
 
+        async function submitFeedback() {
+            const payload = {
+                runId: feedbackRunId.value,
+                jobTitle: feedbackJobTitle.value,
+                company: feedbackCompany.value,
+                feedback: feedbackText.value,
+            };
+
+            const response = await fetch("/api/feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.status === 401) {
+                window.location.href = "/login";
+                return;
+            }
+            if (!response.ok) {
+                const message = await response.json();
+                statusEl.innerHTML = `<p class='error'>${message.detail || "Feedback rejected."}</p>`;
+            } else {
+                statusEl.innerHTML = `<p class='running'>Feedback saved. Cue the recruiter callbacks.</p>`;
+                feedbackRunId.value = "";
+                feedbackJobTitle.value = "";
+                feedbackCompany.value = "";
+                feedbackText.value = "";
+                setTimeout(refreshStatus, 500);
+            }
+        }
+
+        function renderRecentRuns(runs) {
+            recentRunsList.innerHTML = "";
+            if (!runs.length) {
+                recentRunsList.innerHTML = "<li>No runs yet. Launch the agent!</li>";
+                return;
+            }
+            const sorted = [...runs].reverse();
+            sorted.forEach(run => {
+                const li = document.createElement("li");
+                const counts = Object.entries(run.status_counts || {}).map(([status, count]) => `${status}:${count}`).join(", ");
+                li.innerHTML = `
+                    <div>
+                        <strong>${run.run_id}</strong>
+                        <span class="subtext">${run.started_at} → ${run.ended_at || "in-progress"}</span>
+                    </div>
+                    <div class="subtext">Jobs: ${run.result_count || 0} | ${counts || "no apps yet"}</div>
+                `;
+                recentRunsList.appendChild(li);
+            });
+        }
+
+        function renderFeedback(entries) {
+            feedbackList.innerHTML = "";
+            if (!entries.length) {
+                feedbackList.innerHTML = "<li>No feedback yet. Log one below.</li>";
+                return;
+            }
+            entries.forEach(item => {
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    <p><strong>${item.job_title}</strong> @ ${item.company}</p>
+                    <p class="subtext">${item.feedback}</p>
+                    <p class="subtext">${item.received_at || ""}</p>
+                `;
+                feedbackList.appendChild(li);
+            });
+        }
+
+        function renderTopMatches(matches) {
+            topMatchesList.innerHTML = "";
+            if (!matches.length) {
+                topMatchesList.innerHTML = "<li>No matches yet. Launch the agent for fresh intel.</li>";
+                return;
+            }
+            matches.forEach(item => {
+                const li = document.createElement("li");
+                const score = typeof item.fit_score === "number" ? (item.fit_score * 100).toFixed(1) : "0.0";
+                li.innerHTML = `
+                    <div>
+                        <strong>${item.job_title}</strong>
+                        <span class="subtext">@ ${item.company} · ${score}%</span>
+                    </div>
+                    <div class="subtext">${item.status || "n/a"} · ${item.source || "unknown"}</div>
+                `;
+                topMatchesList.appendChild(li);
+            });
+        }
+
+        feedbackToggle.addEventListener("click", () => {
+            feedbackForm.classList.toggle("hidden");
+        });
+
+        feedbackSubmit.addEventListener("click", submitFeedback);
         runBtn.addEventListener("click", launchRun);
         setInterval(refreshStatus, 5000);
         refreshStatus();

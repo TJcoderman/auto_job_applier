@@ -86,6 +86,7 @@ class ApplicationResult:
     status: str
     submitted_at: datetime = field(default_factory=datetime.utcnow)
     notes: Optional[str] = None
+    fit_score: Optional[float] = None
 
 
 __all__ = [

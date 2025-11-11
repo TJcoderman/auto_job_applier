@@ -24,6 +24,44 @@ body {
     color: var(--text);
 }
 
+.login-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 2rem;
+}
+
+.login-card {
+    background: rgba(15, 15, 15, 0.95);
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    padding: 2.4rem;
+    box-shadow: 0 24px 45px rgba(0, 0, 0, 0.4);
+}
+
+.login-card h1 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.error-message {
+    margin-top: 1rem;
+    color: #ff8080;
+    font-size: 0.9rem;
+}
+
 .background-glow {
     position: fixed;
     top: -10%;
@@ -134,6 +172,20 @@ main {
     gap: 1.5rem;
 }
 
+.card-grid.two-column {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.onboarding-main {
+    max-width: 1100px;
+    margin: 0 auto 4rem;
+    padding: 0 1.5rem;
+}
+
+.onboarding-hero {
+    padding-bottom: 1.5rem;
+}
+
 .card {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -223,6 +275,78 @@ input:focus {
     align-items: center;
 }
 
+.result-list li .notes {
+    grid-column: 1 / -1;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.run-list,
+.feedback-list,
+.top-matches-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.run-list li,
+.feedback-list li,
+.top-matches-list li {
+    padding: 0.75rem 1rem;
+    background: rgba(12, 12, 12, 0.8);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.run-list .subtext,
+.feedback-list .subtext {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.feedback-form {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.feedback-form textarea {
+    padding: 0.9rem 1rem;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgba(10, 10, 10, 0.9);
+    color: var(--text);
+    resize: vertical;
+    min-height: 100px;
+}
+
+.hidden {
+    display: none;
+}
+
+.checklist {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.checklist li {
+    line-height: 1.5;
+}
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 1rem;
+}
+
 .status-pill {
     background: rgba(142, 45, 226, 0.15);
     border-radius: 999px;
@@ -278,6 +402,49 @@ input:focus {
 
 .faq {
     margin-top: 4rem;
+}
+
+.pricing {
+    margin-top: 3rem;
+}
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.pricing-card {
+    background: rgba(10, 10, 10, 0.9);
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.pricing-card h3 {
+    margin: 0;
+}
+
+.pricing-card .price {
+    font-size: 2.1rem;
+    font-weight: 700;
+}
+
+.pricing-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    color: var(--muted);
+}
+
+.pricing-card .primary {
+    align-self: flex-start;
 }
 
 .faq-grid {

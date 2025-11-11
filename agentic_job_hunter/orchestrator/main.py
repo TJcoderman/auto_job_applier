@@ -2,12 +2,10 @@ from __future__ import annotations
 
 from typing import List
 
-import structlog
-
 from agentic_job_hunter.orchestrator.engine import Orchestrator
+from agentic_job_hunter.shared.logging import get_logger
 
-
-logger = structlog.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 def main() -> None:

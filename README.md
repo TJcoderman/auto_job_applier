@@ -37,12 +37,14 @@ Additional top-level assets:
    python -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    pip install -r requirements.txt
+   playwright install  # Install browser binaries for automation
    ```
 
 2. **Configure environment**
 
    - Copy `.env.example` to `.env`.
    - Fill in API keys (LLM provider, captcha solving, etc.) and optional credentials.
+   - Decide whether to run the browser in headless mode (`BROWSER_HEADLESS`) and whether to auto-submit Lever applications (`AUTOMATION_AUTO_SUBMIT`).
    - Adjust default search parameters as needed.
 
 3. **Run the orchestrator**
@@ -54,9 +56,23 @@ Additional top-level assets:
 ## CLI Experience
 
 - `python -m agentic_job_hunter run` – execute the full autonomous workflow (supports `--max-jobs` to limit scope).
+- `python -m agentic_job_hunter history` – review recent agent runs, statuses, and errors.
+- `python -m agentic_job_hunter feedback:add` – log recruiter responses for analytics.
+- `python -m agentic_job_hunter feedback:list` – inspect stored feedback (optionally filtered by run).
+- `python -m agentic_job_hunter utils hash-password` – generate hashes for `ADMIN_PASSWORD_HASH`.
 - `python -m agentic_job_hunter profile show` – preview the loaded profile and résumé metadata.
 - `python -m agentic_job_hunter jobs scout` – sample the current job market using configured scrapers.
 - Add `--log-level DEBUG` to any command for verbose tracing.
+- See `docs/ONBOARDING.md` and `docs/PARTNER_PLAYBOOK.md` for rollout and partner playbooks.
+
+### Feature Highlights
+
+- **Live sourcing:** RemoteOK API integration filters remote/high-paying roles using your keywords and salary targets.
+- **LLM tailoring:** OpenAI-powered résumé rewrites (requires `OPENAI_API_KEY`) with automatic fallback to the base résumé when a key is missing.
+- **Lever automation:** Playwright bot pre-fills Lever-hosted job applications, optionally auto-submitting when `AUTOMATION_AUTO_SUBMIT=true`.
+- **Secure credentials:** Store sensitive secrets via OS keychain (with file fallback) using `python -m agentic_job_hunter profile set-credential --key linkedin_password`.
+- **Outcome tracking:** Persist run summaries and recruiter feedback for analytics, accessible via `python -m agentic_job_hunter history` and the web UI.
+- **Access control:** Protect the dashboard with admin credentials (`ADMIN_USERNAME`/`ADMIN_PASSWORD_HASH`) and session secret.
 
 ## Web Experience (Beta)
 
@@ -71,6 +87,10 @@ The dashboard provides:
 - Run controls with max-job limits and optional OpenAI API key entry.
 - Live status feed for recent application runs.
 - Marketing-ready copy and feature walkthrough for demo purposes.
+- Notes for each application indicating whether automation completed, requires review, or encountered issues.
+- Feedback logging UI to capture recruiter responses and surface them alongside runs.
+- Authenticated access via username/password with session management.
+- Pricing tiers and onboarding flows to support monetisation experiments.
 
 ## Guiding Principles
 
@@ -78,6 +98,31 @@ The dashboard provides:
 - **Modularity:** each module should be independently testable and replaceable.
 - **Observability:** detailed logging for each action is critical for trust and debugging.
 - **Human-in-the-loop:** design with the ability to preview and approve actions.
+
+## Testing
+
+Run the automated test suite (network-free) with:
+
+```bash
+pytest
+```
+
+## Deployment
+
+Build and run the containerised stack:
+
+```bash
+docker compose build
+docker compose up
+```
+
+Or use the helper script:
+
+```bash
+./scripts/deploy.sh
+```
+
+Ensure `.env` contains production-ready values (non-default `SECURITY_SESSION_SECRET`, hashed admin password, API keys).
 
 ## Roadmap
 

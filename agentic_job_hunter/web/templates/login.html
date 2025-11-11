@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Job Hunter · Login</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="login-body">
+    <div class="background-glow"></div>
+    <main class="login-container">
+        <section class="login-card">
+            <h1>Welcome back</h1>
+            <p class="subtext">Authenticate to access the control tower.</p>
+            <form id="login-form" class="login-form">
+                <label class="input-label" for="username">Username</label>
+                <input id="username" name="username" type="text" placeholder="admin" autocomplete="username" required>
+
+                <label class="input-label" for="password">Password</label>
+                <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+
+                <button type="submit" class="primary">Enter Dashboard</button>
+            </form>
+            <p id="login-error" class="error-message hidden"></p>
+        </section>
+    </main>
+    <script>
+        const form = document.getElementById("login-form");
+        const errorEl = document.getElementById("login-error");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            errorEl.classList.add("hidden");
+            const payload = {
+                username: form.username.value,
+                password: form.password.value,
+            };
+
+            const response = await fetch("/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                const message = await response.json();
+                errorEl.textContent = message.detail || "Login failed. Check credentials.";
+                errorEl.classList.remove("hidden");
+                form.password.value = "";
+                return;
+            }
+
+            window.location.href = "/";
+        });
+    </script>
+</body>
+</html>
+

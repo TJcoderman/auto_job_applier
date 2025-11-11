@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Job Hunter · Onboarding Guide</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="background-glow"></div>
+    <header class="hero onboarding-hero">
+        <div class="hero__content">
+            <h1>Onboarding Checklist</h1>
+            <p class="tagline">Follow these steps to prep your agent for production-grade job hustling.</p>
+            <div class="hero__actions">
+                <a href="/" class="secondary">← Back to dashboard</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="onboarding-main">
+        <section class="card-grid two-column">
+            <article class="card">
+                <h2>1. Configure identities</h2>
+                <ul class="checklist">
+                    <li>Copy <code>.env.example</code> → <code>.env</code> and set <code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD_HASH</code>, and <code>SECURITY_SESSION_SECRET</code>.</li>
+                    <li>Use <code>python -m agentic_job_hunter utils hash-password</code> to generate the hash.</li>
+                    <li>Store API keys securely via <code>python -m agentic_job_hunter profile set-credential</code>.</li>
+                </ul>
+            </article>
+            <article class="card">
+                <h2>2. Load profile & résumé</h2>
+                <ul class="checklist">
+                    <li>Populate <code>config/profile.json</code> with contact info and resume path.</li>
+                    <li>Upload your base résumé in Markdown/Plaintext for best tailoring results.</li>
+                    <li>Add portfolio links (GitHub, LinkedIn, personal site).</li>
+                </ul>
+            </article>
+            <article class="card">
+                <h2>3. Tune job discovery</h2>
+                <ul class="checklist">
+                    <li>Set keywords, locations, and target compensation in <code>.env</code>.</li>
+                    <li>Extend <code>agentic_job_hunter/job_scraper</code> with bespoke sources if needed.</li>
+                    <li>Use <code>python -m agentic_job_hunter jobs scout</code> to validate search coverage.</li>
+                </ul>
+            </article>
+            <article class="card">
+                <h2>4. Tailoring & automation</h2>
+                <ul class="checklist">
+                    <li>Verify OpenAI access or swap in your preferred LLM provider.</li>
+                    <li>Install browser automation assets via <code>playwright install chromium</code>.</li>
+                    <li>Test Lever automation in review mode before enabling auto-submit.</li>
+                </ul>
+            </article>
+            <article class="card">
+                <h2>5. Run & review</h2>
+                <ul class="checklist">
+                    <li>Launch the agent via web UI or <code>python -m agentic_job_hunter run --max-jobs 3</code>.</li>
+                    <li>Inspect fit scores and recruiter feedback in the dashboard.</li>
+                    <li>Log every external response to improve future prioritisation.</li>
+                </ul>
+            </article>
+            <article class="card">
+                <h2>6. Scale to production</h2>
+                <ul class="checklist">
+                    <li>Deploy with Docker: <code>docker compose up -d</code>.</li>
+                    <li>Integrate notifications (Slack/Email/SMS) per the deployment checklist.</li>
+                    <li>Review the partner playbook for enterprise onboarding & monetisation ideas.</li>
+                </ul>
+            </article>
+        </section>
+    </main>
+</body>
+</html>
+
